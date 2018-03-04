@@ -5,6 +5,6 @@ export default class Customer {
     this.email = email || ''
     this.passportNumber = passportNumber || ''
     this.phoneNumber = phoneNumber || ''
-    this.dateOfBirth = this.dateOfBirth || ''
+    this.dateOfBirth = dateOfBirth || ''
   }
 }

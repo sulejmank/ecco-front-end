@@ -7,36 +7,11 @@
         <input type="file" class="d-none" id="profile-picture">
       </div>
       <form class="form-row col-10" @submit.prevent="validateForm('customer-form')" data-vv-scope="customer-form"  autocomplete='off'>
-        <div class="form-group col-6">
-          <label for="name">Ime</label>
-          <input type="text" :class="{'form-control': true, 'is-invalid': errors.has('customer-form.name')}" id="name" name="name" placeholder="Ime Musterije" 
-                v-model="customer.name" 
-                v-validate="'required|alpha_spaces'" 
-                v-on:keydown.down.prevent="focusSuggestions('down')" 
-                v-on:keydown.up.prevent="focusSuggestions('up')" 
-                autocomplete="off">
-          <span v-show="errors.has('customer-form.name')" id="nameHelp" class="form-text text-danger">{{ errors.first('customer-form.name') }}</span>
-          <div class="suggestions" v-show="status == 'loading' || status == 'loaded'">
-            <div :class="{'customer row':true, 'focused': isFocusedItem(i)}" v-for="(customer, i) in mockSuggestions" v-show="status == 'loaded'">
-              <div class="col-2">
-                <img src="@/assets/logo.png" class="img-thumbnail" alt="">
-              </div>
-              <div class="col-10">
-                <p class="bottom-margin"><strong>{{customer.surname + ', ' + customer.name}}</strong></p>
-                <p class="bottom-margin">{{customer.email}}</p>
-              </div>
-            </div>
-            <div class="customer row" v-show="status == 'loading'">
-              <div class="col text-center">
-                <img src="@/assets/loading.gif" class="size" alt="">
-              </div>
-            </div>
-          </div>
-        </div>
+        <input-suggestion @modelSuggested="updateCustomer" :classes="'form-group col-6'" :label="'Ime'" :name="'name'" :formName="'customer-form'" :placeholder="'Ime Musterije'" :value="customer.name"></input-suggestion>
         <div class="form-group col-6">
           <label for="surname">Prezime</label>
           <input type="text" v-bind:class="{'form-control': true, 'is-invalid': errors.has('customer-form.surname')}" id="surname" name="surname" placeholder="Prezime Musterije" v-model="customer.surname" v-validate="'required|alpha_spaces'">
-          <span v-show="errors.has('customer-form.surname')" id="nameHelp" class="form-text text-danger">{{ errors.first('customer-form.surname') }}</span>
+          <span v-show="errors.has('customer-form.surname')" id="nameHelp" class="form-text text-danger error-msg">{{ errors.first('customer-form.surname') }}</span>
         </div>
         <div class="form-group col-6 ">
           <label for="email">Email</label>
@@ -46,22 +21,22 @@
             </div>
             <input type="email" v-bind:class="{'form-control': true, 'is-invalid': errors.has('customer-form.email')}" id="email" name="email" placeholder="Email Musterije" v-model="customer.email" v-validate="'required|email'">
           </div>
-          <span v-show="errors.has('customer-form.email')" class="form-text text-danger">{{ errors.first('customer-form.email') }}</span>
+          <span v-show="errors.has('customer-form.email')" class="form-text text-danger error-msg">{{ errors.first('customer-form.email') }}</span>
         </div>
         <div class="form-group col-6">
           <label for="passportNumber">Broj Pasosa</label>
-          <input type="text" v-bind:class="{'form-control': true, 'is-invalid': errors.has('customer-form.passport')}" id="passportNumber" name="passport" placeholder="Broj Pasosa Musterije" v-model="customer.passport" v-validate="'required|alpha_num'">
-          <span v-show="errors.has('customer-form.passport')" class="form-text text-danger">{{ errors.first('customer-form.passport') }}</span>
+          <input type="text" v-bind:class="{'form-control': true, 'is-invalid': errors.has('customer-form.passport')}" id="passportNumber" name="passport" placeholder="Broj Pasosa Musterije" v-model="customer.passportNumber" v-validate="'required|alpha_num'">
+          <span v-show="errors.has('customer-form.passport')" class="form-text text-danger error-msg">{{ errors.first('customer-form.passport') }}</span>
         </div>
         <div class="form-group col-6">
           <label for="phoneNumber">Kontakt Telefon</label>
           <input type="text" v-bind:class="{'form-control': true, 'is-invalid': errors.has('customer-form.phone')}" id="phoneNumber" name="phone" placeholder="Kontakt Telefon" v-model="customer.phoneNumber" v-validate="{required:true, regex:/^[0-9+-]{6,30}$/}">
-          <span v-show="errors.has('customer-form.phone')" class="form-text text-danger">{{ errors.first('customer-form.phone') }}</span>
+          <span v-show="errors.has('customer-form.phone')" class="form-text text-danger error-msg">{{ errors.first('customer-form.phone') }}</span>
         </div>
         <div class="form-group col-6">
           <label for="dateOfBirth">Datum Rodjenja</label>
            <date-picker :date='startTime' @change="update" :option="option"></date-picker>
-          <small id="passportHelp" class="form-text text-muted d-none">This is error message</small>
+          <small id="passportHelp" class="form-text text-muted d-none error-msg">This is error message</small>
         </div>
         <div class="form-group col-6">
           <button class="btn btn-primary" v-on:click.prevent="print()">Print</button>
@@ -74,6 +49,8 @@
 <script>
 import Customer from '@/models/Customer.js'
 import myDatepicker from 'vue-datepicker/vue-datepicker-es6.vue'
+import Api from '@/services/api.js'
+import Suggestion from '@/components/helpers/Suggestion'
 // import myDatepicker from '@/components/helpers/Datepicker.custom.vue' // custom Datepicker refined one
 import moment from 'moment'
 
@@ -81,6 +58,7 @@ export default{
   name: 'customer',
   data () {
     return {
+      api: new Api(),
       focusedItem: 0,
       customer: new Customer(),
       startTime: {
@@ -96,21 +74,30 @@ export default{
         dismissible: true // as true as default
       },
       mockSuggestions: [],
-      status: 'unavailable'
+      status: 'unavailable',
+      timer: undefined,
+      ajaxTimer: undefined
     }
   },
   computed: {
     name () {
-      return this.customer.name;
+      return this.customer.name
     }
   },
   components: {
-    'date-picker': myDatepicker
+    'date-picker': myDatepicker,
+    'input-suggestion': Suggestion
   },
   methods: {
+    updateCustomer (customer) {
+      this.customer = customer
+    },
     print () {
       this.$validator.validateAll('customer-form')
         .then((res) => {
+          if (res) {
+            console.log(this.customer)
+          }
           console.log(res)
         })
     },
@@ -125,68 +112,9 @@ export default{
         .then(result => {
           console.log(result)
         })
-    },
-    focusSuggestions (direction) {
-      this.focusedItem = direction === 'down' ? this.next(this.focusedItem) : this.previous(this.focusedItem);
-    },
-    next (current) {
-      return current == this.mockSuggestions.length - 1 ? 0 : ++current
-    },
-    previous (current) {
-      return current == 0 ? this.mockSuggestions.length - 1 : --current
-    },
-    isFocusedItem (i) {
-      let index = i++
-      return index === this.focusedItem
-    },
-    getSuggestions () {
-      console.log(this.status =="loading")
-      this.status = "loading"
-      clearTimeout(this.timer);
-      console.log(this.status =="loading")
-      this.timer = setTimeout(() =>{
-        // this.status = "loading"
-        console.log(this.status)
-        var self = this
-        var promise = Promise.resolve(
-          [
-            {
-              name: 'Dzenan',
-              surname: 'Imamovic',
-              email: 'dzeimamovic@gmail.com'
-            },
-            {
-              name: 'Dzenan',
-              surname: 'Imamovic',
-              email: 'dzeimamovic@gmail.com'
-            },
-            {
-              name: 'Dzenan',
-              surname: 'Imamovic',
-              email: 'dzeimamovic@gmail.com'
-            },
-            {
-              name: 'Dzenan',
-              surname: 'Imamovic',
-              email: 'dzeimamovic@gmail.com'
-            }
-          ]);
-          setTimeout(function () {
-            promise.then(res => {
-              console.log(res, self)
-              self.mockSuggestions = res
-              self.status = "loaded"
-              console.log(this.status);
-            },2000)
-          })
-        
-      }, 1000)
     }
   },
   watch: {
-    name () {
-      this.getSuggestions()
-    }
   }
 }
 </script>
@@ -215,5 +143,8 @@ export default{
 }
 .focused{
   background-color:#e9ecef;
+}
+.error-msg{
+  font-size:.7em;
 }
 </style>
