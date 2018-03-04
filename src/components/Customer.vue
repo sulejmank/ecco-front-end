@@ -7,10 +7,10 @@
         <input type="file" class="d-none" id="profile-picture">
       </div>
       <form class="form-row col-10" @submit.prevent="validateForm('customer-form')" data-vv-scope="customer-form"  autocomplete='off'>
-        <input-suggestion @modelSuggested="updateCustomer" :classes="'form-group col-6'" :label="'Ime'" :name="'name'" :formName="'customer-form'" :placeholder="'Ime Musterije'" :value="customer.name"></input-suggestion>
+        <input-suggestion @modelSuggested="updateCustomer" @updateModel="updateName" :classes="'form-group col-6'" :label="'Ime'" :name="'name'" :formName="'customer-form'" :placeholder="'Ime Musterije'" :value="customer.ime"></input-suggestion>
         <div class="form-group col-6">
           <label for="surname">Prezime</label>
-          <input type="text" v-bind:class="{'form-control': true, 'is-invalid': errors.has('customer-form.surname')}" id="surname" name="surname" placeholder="Prezime Musterije" v-model="customer.surname" v-validate="'required|alpha_spaces'">
+          <input type="text" v-bind:class="{'form-control': true, 'is-invalid': errors.has('customer-form.surname')}" id="surname" name="surname" placeholder="Prezime Musterije" v-model="customer.prezime" v-validate="'required|alpha_spaces'">
           <span v-show="errors.has('customer-form.surname')" id="nameHelp" class="form-text text-danger error-msg">{{ errors.first('customer-form.surname') }}</span>
         </div>
         <div class="form-group col-6 ">
@@ -25,13 +25,23 @@
         </div>
         <div class="form-group col-6">
           <label for="passportNumber">Broj Pasosa</label>
-          <input type="text" v-bind:class="{'form-control': true, 'is-invalid': errors.has('customer-form.passport')}" id="passportNumber" name="passport" placeholder="Broj Pasosa Musterije" v-model="customer.passportNumber" v-validate="'required|alpha_num'">
+          <input type="text" v-bind:class="{'form-control': true, 'is-invalid': errors.has('customer-form.passport')}" id="passportNumber" name="passport" placeholder="Broj Pasosa Musterije" v-model="customer.brojPasosa" v-validate="'required|alpha_num'">
           <span v-show="errors.has('customer-form.passport')" class="form-text text-danger error-msg">{{ errors.first('customer-form.passport') }}</span>
         </div>
         <div class="form-group col-6">
           <label for="phoneNumber">Kontakt Telefon</label>
-          <input type="text" v-bind:class="{'form-control': true, 'is-invalid': errors.has('customer-form.phone')}" id="phoneNumber" name="phone" placeholder="Kontakt Telefon" v-model="customer.phoneNumber" v-validate="{required:true, regex:/^[0-9+-]{6,30}$/}">
+          <input type="text" v-bind:class="{'form-control': true, 'is-invalid': errors.has('customer-form.phone')}" id="phoneNumber" name="phone" placeholder="Kontakt Telefon" v-model="customer.brojTelefona" v-validate="{required:true, regex:/^[0-9+-]{6,30}$/}">
           <span v-show="errors.has('customer-form.phone')" class="form-text text-danger error-msg">{{ errors.first('customer-form.phone') }}</span>
+        </div>
+        <div class="form-group col-6">
+          <label for="occupation">Struka</label>
+          <input type="text" v-bind:class="{'form-control': true, 'is-invalid': errors.has('customer-form.occupation')}" id="occupation" name="occupation" placeholder="Zanimanje" v-model="customer.struka" v-validate="'required'">
+          <span v-show="errors.has('customer-form.occupation')" class="form-text text-danger error-msg">{{ errors.first('customer-form.occupation') }}</span>
+        </div>
+        <div class="form-group col-6">
+          <label for="address">Adresa</label>
+          <input type="text" v-bind:class="{'form-control': true, 'is-invalid': errors.has('customer-form.address')}" id="address" name="address" placeholder="Adresa" v-model="customer.adresa" v-validate="'required'">
+          <span v-show="errors.has('customer-form.address')" class="form-text text-danger error-msg">{{ errors.first('customer-form.address') }}</span>
         </div>
         <div class="form-group col-6">
           <label for="dateOfBirth">Datum Rodjenja</label>
@@ -96,7 +106,7 @@ export default{
       this.$validator.validateAll('customer-form')
         .then((res) => {
           if (res) {
-            console.log(this.customer)
+            this.api.saveCustomer(this.customer)
           }
           console.log(res)
         })
@@ -105,12 +115,17 @@ export default{
       document.getElementById('profile-picture').click()
     },
     update (event) {
-      this.customer.dateOfBirth = event
+      this.customer.datumRodjenja = moment().format('YYYY-MM-DD', event)
+    },
+    updateName (title) {
+      this.customer.ime = title
     },
     validateForm (form) {
       this.$validator.validateAll(form)
         .then(result => {
-          console.log(result)
+          if (result) {
+            console.log(result)
+          }
         })
     }
   },

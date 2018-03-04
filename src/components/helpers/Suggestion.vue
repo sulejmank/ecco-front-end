@@ -1,0 +1,123 @@
+<template>
+<div :class="classes">
+  <label :for="name">{{label}}</label>
+  <input type="text" :class="{'form-control': true, 'is-invalid': errors.has(formName +'.'+ name)}" v-bind:id="name" v-bind:name="name" :placeholder="placeholder" v-model="model" v-validate="'required|alpha_spaces'" v-on:keydown.down.prevent="focusSuggestions('down')" v-on:keydown.up.prevent="focusSuggestions('up')" v-on:blur="unfocused()" autocomplete="off">
+  <span v-show="errors.has(formName +'.'+ name)" id="nameHelp" class="form-text text-danger error-msg">{{ errors.first(formName +'.'+ name) }}</span>
+  <div class="suggestions" v-show="status == 'loading'">
+    <div :class="{'customer row':true, 'focused': isFocusedItem(i)}" v-for="(customer, i) in suggestions" :key="customer.id" v-show="suggestions.length > 0">
+      <div class="col-2">
+        <img src="@/assets/logo.png" class="img-thumbnail" alt="">
+      </div>
+      <div class="col-10">
+        <p class="bottom-margin"><strong>{{customer.prezime + ', ' + customer.ime}}</strong></p>
+        <p class="bottom-margin">{{customer.email}}</p>
+      </div>
+    </div>
+    <div class="customer row" v-show="status == 'loading' && suggestions.length == 0 ">
+      <div class="col text-center">
+        <img src="@/assets/loading.gif" class="size" alt="">
+      </div>
+    </div>
+  </div>
+</div>
+</template>
+
+<script>
+import Api from '@/services/api.js'
+
+export default {
+  name: 'Suggestion',
+  props: {
+    value: {
+      type: String
+    },
+    name: {
+      type: String
+    },
+    classes: {
+      type: String
+    },
+    label: {
+      type: String
+    },
+    formName: {
+      type: String
+    },
+    placeholder: {
+      type: String
+    }
+  },
+  data () {
+    return {
+      api: new Api(),
+      model: '',
+      status: undefined,
+      suggestions: [],
+      focusedItem: 0
+      // errors: this.$parent.$validator.errors
+    }
+  },
+  methods: {
+    isFocusedItem (i) {
+      let index = i++
+      return index === this.focusedItem
+    },
+    getSuggestions (e) {
+      this.focusedItem = 0
+      this.$validator.validate(this.formName + '.' + this.name).then(res => {
+        if (res) {
+          console.log(e)
+          this.status = undefined
+          clearTimeout(this.timer)
+          this.status = 'loading'
+          this.timer = setTimeout(() => {
+            var self = this
+            this.api.getSuggestedCustomers().then(
+              res => {
+                self.suggestions = res
+              }
+            )
+          }, 400)
+        } else {
+          clearTimeout(this.timer)
+          clearTimeout(this.ajaxTimer)
+          this.status = undefined
+        }
+      })
+    },
+    unfocused () {
+      clearTimeout(this.timer)
+      clearTimeout(this.ajaxTimer)
+      this.status = undefined
+      this.$emit('updateModel', this.model)
+    },
+    focusSuggestions (direction) {
+      this.focusedItem = direction === 'down' ? this.next(this.focusedItem) : this.previous(this.focusedItem)
+      this.$emit('modelSuggested', this.suggestions[this.focusedItem])
+    },
+    next (current) {
+      return current === this.suggestions.length - 1 ? 0 : ++current
+    },
+    previous (current) {
+      return current === 0 ? this.suggestions.length - 1 : --current
+    }
+  },
+  watch: {
+    model (oldValue, newValue) {
+      if (!this.imported) {
+        this.getSuggestions(newValue)
+      } else {
+        this.imported = false
+      }
+    },
+    value (newValue, oldValue) {
+      this.imported = true
+      this.model = newValue
+    }
+  }
+
+}
+</script>
+<style>
+
+</style>

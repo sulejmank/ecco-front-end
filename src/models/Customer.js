@@ -1,10 +1,12 @@
 export default class Customer {
-  constructor (name, surname, email, passportNumber, phoneNumber, dateOfBirth) {
-    this.name = name || ''
-    this.surname = surname || ''
+  constructor (name, surname, email, passportNumber, phoneNumber, dateOfBirth, occupation, adresa) {
+    this.ime = name || ''
+    this.prezime = surname || ''
     this.email = email || ''
-    this.passportNumber = passportNumber || ''
-    this.phoneNumber = phoneNumber || ''
-    this.dateOfBirth = dateOfBirth || ''
+    this.brojPasosa = passportNumber || ''
+    this.brojTelefona = phoneNumber || ''
+    this.datumRodjenja = dateOfBirth || ''
+    this.struka = occupation || ''
+    this.adresa = adresa || ''
   }
 }
