@@ -1,19 +1,26 @@
 import axios from 'axios'
-import Customer from '@/models/Customer.js'
-// constructor (name, surname, email, passportNumber, phoneNumber, dateOfBirth)
+// import Customer from '@/models/Customer.js'
+import Suggestion from '@/models/Suggestion.js'
+
 export default class Api {
   constructor () {
     this.baseUrl = 'http://ecco.local'
+    this.googleUrl = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?'
+    this.apiKey = 'key=AIzaSyD26SxqE4hlzjbpJ99pFOdrSv62c_Bjgx8'
   }
-  getSuggestedCustomers () {
-    var promise = Promise.resolve([
-      new Customer('Haris', 'Zenovic', 'zenovicharis@gmail.com', '51155054', '+381654261211', '21/09/1993'),
-      new Customer('Sulejman', 'Karisik', 'karisiks@gmail.com', '51155054', '+381654261211', '31/12/1994'),
-      new Customer('Merdan', 'Sabotic', 'saboticm@gmail.com', '51155054', '+381654261211', '19/09/1995'),
-      new Customer('Dzenan', 'Imamovic', 'imamovicdze@gmail.com', '51155054', '+381654261211', '4/03/1995')
-    ])
-
-    return promise
+  getSuggestedCustomers (input) {
+    return axios.get(this.api.baseUrl + '/api/relevantCustomer?search=' + input).then(
+      res => {
+        if (res.data !== undefined) {
+          var customerSuggestions = res.data.map(el => {
+            return new Suggestion(el.ime + ', ' + el.prezime, el.struka, el)
+          })
+          return customerSuggestions
+        }
+        return []
+      }, err => {
+        return err
+      })
   }
 
   saveCustomer (customer) {
@@ -24,5 +31,21 @@ export default class Api {
         console.log(errorMsg)
       }
     )
+  }
+
+  getPlaceSuggestion (input) {
+    return axios.get(this.api.baseUrl + '/api/search' + '?input=' + encodeURI(input)).then(
+      res => {
+        console.log(res)
+        if (res.data !== undefined) {
+          var placesSuggestions = res.data.map(el => {
+            return new Suggestion(el.structured_formatting.main_text, el.structured_formatting.secondary_text, el.structured_formatting.main_text + ', ' + el.structured_formatting.secondary_text)
+          })
+          return placesSuggestions
+        }
+        return []
+      }, err => {
+        return err
+      })
   }
 }

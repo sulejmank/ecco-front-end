@@ -1,16 +1,16 @@
 <template>
 <div :class="classes">
   <label :for="name">{{label}}</label>
-  <input type="text" :class="{'form-control': true, 'is-invalid': errors.has(formName +'.'+ name)}" v-bind:id="name" v-bind:name="name" :placeholder="placeholder" v-model="model" v-validate="'required|alpha_spaces'" v-on:keydown.down.prevent="focusSuggestions('down')" v-on:keydown.up.prevent="focusSuggestions('up')" v-on:blur="unfocused()" autocomplete="off">
+  <input type="text" :class="{'form-control': true, 'is-invalid': errors.has(formName +'.'+ name)}" v-bind:id="name" v-bind:name="name" :placeholder="placeholder" v-model="model" v-validate="'required: true, alpha_spaces: true, regex: ^[\d,\s]+$'" v-on:keydown.down.prevent="focusSuggestions('down')" v-on:keydown.up.prevent="focusSuggestions('up')" v-on:blur="unfocused()" autocomplete="new-suggestion">
   <span v-show="errors.has(formName +'.'+ name)" id="nameHelp" class="form-text text-danger error-msg">{{ errors.first(formName +'.'+ name) }}</span>
   <div class="suggestions" v-show="status == 'loading'">
-    <div :class="{'customer row':true, 'focused': isFocusedItem(i)}" v-for="(customer, i) in suggestions" :key="customer.id" v-show="suggestions.length > 0">
+    <div :class="{'customer row':true, 'focused': isFocusedItem(i)}" v-for="(suggestion, i) in suggestions" :key="suggestion.id" v-show="suggestions.length > 0">
       <div class="col-2">
         <img src="@/assets/logo.png" class="img-thumbnail" alt="">
       </div>
       <div class="col-10">
-        <p class="bottom-margin"><strong>{{customer.prezime + ', ' + customer.ime}}</strong></p>
-        <p class="bottom-margin">{{customer.email}}</p>
+        <p class="bottom-margin"><strong>{{suggestion.mainData}}</strong></p>
+        <p class="bottom-margin">{{suggestion.subData}}</p>
       </div>
     </div>
     <div class="customer row" v-show="status == 'loading' && suggestions.length == 0 ">
@@ -45,6 +45,9 @@ export default {
     },
     placeholder: {
       type: String
+    },
+    method: {
+      type: Function
     }
   },
   data () {
@@ -72,8 +75,9 @@ export default {
           this.status = 'loading'
           this.timer = setTimeout(() => {
             var self = this
-            this.api.getSuggestedCustomers().then(
+            this.method(e).then(
               res => {
+                console.log(res)
                 self.suggestions = res
               }
             )
@@ -93,7 +97,7 @@ export default {
     },
     focusSuggestions (direction) {
       this.focusedItem = direction === 'down' ? this.next(this.focusedItem) : this.previous(this.focusedItem)
-      this.$emit('modelSuggested', this.suggestions[this.focusedItem])
+      this.$emit('modelSuggested', this.suggestions[this.focusedItem].objectEntity)
     },
     next (current) {
       return current === this.suggestions.length - 1 ? 0 : ++current
@@ -119,5 +123,29 @@ export default {
 }
 </script>
 <style>
+.suggestions{
+  width: 98%;
+  position: absolute;
+  background-color: #fff;
+  z-index: 100;
+  border: 1px solid #ddd;
+  padding: 0 2px;
+}
 
+.customer{
+  padding:6px 0;
+  margin:0;
+}
+
+.error-msg{
+  font-size:.7em;
+}
+
+.bottom-margin{
+  margin-bottom:0;
+}
+
+.focused{
+  background-color:#e9ecef;
+}
 </style>

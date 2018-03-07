@@ -1,13 +1,13 @@
 <template>
   <div class="container">
     <div class="row">
-      <div class="col-2 text-center">
+      <div class="col-2 text-center" v-if="!isPassenger">
         <img class="img-thumbnail margin-y" src="@/assets/logo.png" alt="">
         <button class="btn btn-primary text-center" v-on:click.prevent="upload()">Upload Photo</button>
         <input type="file" class="d-none" id="profile-picture">
       </div>
-      <form class="form-row col-10" @submit.prevent="validateForm('customer-form')" data-vv-scope="customer-form"  autocomplete='off'>
-        <input-suggestion @modelSuggested="updateCustomer" @updateModel="updateName" :classes="'form-group col-6'" :label="'Ime'" :name="'name'" :formName="'customer-form'" :placeholder="'Ime Musterije'" :value="customer.ime"></input-suggestion>
+      <form :class="{'form-row': true, 'col-10': !isPassenger, 'col-12': isPassenger }" @submit.prevent="validateForm('customer-form')" data-vv-scope="customer-form"  autocomplete='off'>
+        <input-suggestion @modelSuggested="updateCustomer" :method="api.getSuggestedCustomers" @updateModel="updateName" :classes="'form-group col-6'" :label="'Ime'" :name="'name'" :formName="'customer-form'" :placeholder="'Ime Musterije'" :value="customer.ime"></input-suggestion>
         <div class="form-group col-6">
           <label for="surname">Prezime</label>
           <input type="text" v-bind:class="{'form-control': true, 'is-invalid': errors.has('customer-form.surname')}" id="surname" name="surname" placeholder="Prezime Musterije" v-model="customer.prezime" v-validate="'required|alpha_spaces'">
@@ -49,7 +49,7 @@
           <small id="passportHelp" class="form-text text-muted d-none error-msg">This is error message</small>
         </div>
         <div class="form-group col-6">
-          <button class="btn btn-primary" v-on:click.prevent="print()">Print</button>
+          <button class="btn btn-primary" v-on:click.prevent="addPassenger">Dodaj</button>
         </div>
       </form>
     </div>
@@ -66,6 +66,11 @@ import moment from 'moment'
 
 export default{
   name: 'customer',
+  props:{
+    isPassenger: {
+      type: Boolean
+    }
+  },
   data () {
     return {
       api: new Api(),
@@ -102,11 +107,16 @@ export default{
     updateCustomer (customer) {
       this.customer = customer
     },
-    print () {
+    addPassenger () {
       this.$validator.validateAll('customer-form')
         .then((res) => {
           if (res) {
-            this.api.saveCustomer(this.customer)
+            if(this.isPassenger){
+              console.log("emiting to modal")
+              this.$emit('addPassenger', this.customer)
+            } else{
+              this.api.saveCustomer(this.customer)
+            }
           }
           console.log(res)
         })
@@ -149,16 +159,10 @@ export default{
 .bottom-margin{
   margin-bottom:0;
 }
-.customer{
-  padding:6px 0;
-  margin:0;
-}
 .size{
   width:30%;
 }
-.focused{
-  background-color:#e9ecef;
-}
+
 .error-msg{
   font-size:.7em;
 }
