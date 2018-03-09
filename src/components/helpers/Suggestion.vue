@@ -1,7 +1,7 @@
 <template>
 <div :class="classes">
   <label :for="name">{{label}}</label>
-  <input type="text" :class="{'form-control': true, 'is-invalid': errors.has(formName +'.'+ name)}" v-bind:id="name" v-bind:name="name" :placeholder="placeholder" v-model="model" v-validate="'required: true, alpha_spaces: true, regex: ^[\d,\s]+$'" v-on:keydown.down.prevent="focusSuggestions('down')" v-on:keydown.up.prevent="focusSuggestions('up')" v-on:blur="unfocused()" autocomplete="new-suggestion">
+  <input type="text" :class="{'form-control': true, 'is-invalid': errors.has(formName +'.'+ name)}" v-bind:id="name" v-bind:name="name" :placeholder="placeholder" v-model="model" v-validate="'required: true, alpha_spaces: true, regex: ^[\d,\s]+$'" v-on:keydown.down.prevent="focusSuggestions('down')" v-on:keydown.up.prevent="focusSuggestions('up')" v-on:blur="unfocused()" v-on:keydown.esc.prevent="escapeMessage" autocomplete="new-suggestion">
   <span v-show="errors.has(formName +'.'+ name)" id="nameHelp" class="form-text text-danger error-msg">{{ errors.first(formName +'.'+ name) }}</span>
   <div class="suggestions" v-show="status == 'loading'">
     <div :class="{'customer row':true, 'focused': isFocusedItem(i)}" v-for="(suggestion, i) in suggestions" :key="suggestion.id" v-show="suggestions.length > 0">
@@ -65,20 +65,22 @@ export default {
       let index = i++
       return index === this.focusedItem
     },
-    getSuggestions (e) {
+    getSuggestions (input) {
       this.focusedItem = 0
       this.$validator.validate(this.formName + '.' + this.name).then(res => {
         if (res) {
-          console.log(e)
           this.status = undefined
           clearTimeout(this.timer)
           this.status = 'loading'
           this.timer = setTimeout(() => {
             var self = this
-            this.method(e).then(
+            this.method(input).then(
               res => {
-                console.log(res)
-                self.suggestions = res
+                if (res.length > 0) {
+                  self.suggestions = res
+                } else {
+                  this.status = undefined
+                }
               }
             )
           }, 400)
@@ -97,13 +99,20 @@ export default {
     },
     focusSuggestions (direction) {
       this.focusedItem = direction === 'down' ? this.next(this.focusedItem) : this.previous(this.focusedItem)
-      this.$emit('modelSuggested', this.suggestions[this.focusedItem].objectEntity)
+      console.log(this.suggestions[this.focusedItem])
+      if (this.suggestions[this.focusedItem] !== undefined) {
+        this.$emit('modelSuggested', this.suggestions[this.focusedItem].objectEntity)
+      }
     },
     next (current) {
       return current === this.suggestions.length - 1 ? 0 : ++current
     },
     previous (current) {
       return current === 0 ? this.suggestions.length - 1 : --current
+    },
+    escapeMessage () {
+      this.status = undefined
+      this.$emit('escapeSuggestion')
     }
   },
   watch: {

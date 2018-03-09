@@ -27,6 +27,20 @@ export default class Api {
     axios.post(this.baseUrl + '/api/addCustomer', customer).then(
       response => {
         console.log(response)
+        return response
+      }, errorMsg => {
+        console.log(errorMsg)
+        return errorMsg
+      }
+    )
+  }
+
+  savePassanger (customer) {
+    customer.putnik = true
+    axios.post(this.baseUrl + '/api/addCustomer', customer).then(
+      response => {
+        console.log(response)
+        return response
       }, errorMsg => {
         console.log(errorMsg)
       }

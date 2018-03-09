@@ -8,20 +8,19 @@
               <strong>Avio Karte</strong>
             </h4>
           </div>
-          <div class="col row">
-            <div class="col-lg-7 col-md-5 col-sm-3 d-xs-none"></div>
+          <div class="col text-right" v-if="customerIsCreated">
             <img src="@/assets/logo.png" class="img-thumbnail sized" alt="">
-            <div class="col-3">
-              <p class="bottom-margin">
-                Name:<strong>Zenovic, Haris</strong>
-              </p>
-              <p class="bottom-margin">
-                Email:<strong>zenovicharis@gmail.com</strong>
-              </p>
-              <p class="bottom-margin">
-                Passport:<strong>011123230494</strong>
-              </p>
-            </div>
+          </div>
+          <div class="col-4" v-if="customerIsCreated">
+            <p class="bottom-margin">
+              Name:<strong>{{customer.prezime + ', ' + customer.ime}}</strong>
+            </p>
+            <p class="bottom-margin">
+              Email:<strong>{{customer.email}}</strong>
+            </p>
+            <p class="bottom-margin">
+              Passport:<strong>{{customer.brojPasosa}}</strong>
+            </p>
           </div>
         </div>
       </div>
@@ -33,7 +32,7 @@
             <input type="checkbox" v-model="roundTrip" id="round-trip">
             <label for="round-trip">Avio Karta u <strong>Oba Smera</strong></label>
           </p>
-        </div>        
+        </div>
         <suggestion @modelSuggested="updateDeparture" @updateModel="updateDeparture" :method="api.getPlaceSuggestion" :classes="'form-group col-6'" :label="'Mesto polaska'" :name="'departurePlace'" :formName="'flight-ticket-form'" :placeholder="'Mesto polaska'" :value="ticket.putovanjeOd"></suggestion>
         <suggestion @modelSuggested="updateDestination" @updateModel="updateDestination" :method="api.getPlaceSuggestion" :classes="'form-group col-6'" :label="'Destinacija'" :name="'destination'" :formName="'flight-ticket-form'" :placeholder="'Destinacija'" :value="ticket.putovanjeDo"></suggestion>
         <div class="form-group col-6">
@@ -53,12 +52,15 @@
         </div>
         <hr class="col-12 horizontal" />
         <div class="form-group col-12 row bottom-margin">
-          <div class="col-12 row" v-for="passanger in passangers" :key="passanger.id">
-            <label for="" class="col-6 text-center">{{passanger.prezime + ", " +passanger.ime}}</label>
-            <input type="text" class="form-control col-6" name="price-bruto">
+          <div class="col-12 row passangers" v-for="(passanger, index) in flightPassengers" :key="passanger.id">
+            <label for="" class="col-6 text-center passanger-row">
+              <i class="far fa-times-circle close-awsome" v-on:click="removePassanger(index)"></i>
+              {{passanger.prezime + ", " +passanger.ime }}
+            </label>
+            <input type="text" class="form-control col-6" name="price-bruto" placeholder="Broj rezervacije/karte" v-model="passanger.cardId">
           </div>
           <div  class="col text-center">
-            <button class="btn btn-default" v-on:click.prevent="addPassenger"><i class="fas fa-plus-circle"></i>Dodaj Putnika</button>
+            <button class="btn btn-default" v-on:click.prevent="addPassenger" type="button"><i class="fas fa-plus-circle"></i>Dodaj Putnika</button>
           </div>
         </div>
         <hr class="col-12 horizontal" />
@@ -74,9 +76,17 @@
           <label for="" class="col-6 text-center">Cena NETO</label>
           <input type="text" class="form-control col-6" name="price-neto">
         </div>
+        <div class="form-group col-12 row">
+          <div class="col-6">
+            <button class="btn btn-primary btn-lg btn-block" v-on:click.prevent="print">Jos Produkta</button>
+          </div>
+          <div class="col-6">
+            <button class="btn btn-primary btn-lg btn-block">Add Produc</button>
+          </div>
+        </div>
       </form>
     </div>
-    <modal v-if="show" @closeModal="show = false" @addCustomer="addCustomer"></modal>
+    <modal v-if="show" @closeModal="show = false"></modal>
   </div>
 </template>
 <script>
@@ -119,6 +129,26 @@ export default{
       }
     }
   },
+  computed: {
+    customerIsCreated () {
+      return this.$store.state.customer.id !== undefined
+    },
+    customer () {
+      return this.$store.getters.getCustomer
+    },
+    flightPassengers () {
+      return this.$store.state.passangers
+    },
+    ticketIds () {
+      return this.flightPassengers.map(el => {
+        var obj = {
+          'ticketId': el.cardId,
+          'passangerId': el.id
+        }
+        return obj
+      })
+    }
+  },
   methods: {
     update () {
       console.log(' It\'s all good, broo ')
@@ -130,7 +160,7 @@ export default{
       this.ticket.datumPovratka = event
     },
     addPassenger () {
-      this.show = true;
+      this.show = true
       console.log(' Passenger Added')
     },
     updateDestination (event) {
@@ -142,6 +172,12 @@ export default{
     addCustomer (event) {
       console.log('here')
       this.passangers.push(event)
+    },
+    removePassanger (i) {
+      this.$store.commit('removePassanger', i)
+    },
+    print () {
+      console.log(this.ticketIds)
     }
   }
 }
@@ -167,5 +203,25 @@ export default{
 }
 .btn i{
   padding-right:1em;
+}
+
+.passangers{
+  margin:1% 0%
+}
+
+.passanger-row{
+  font-size: 1.1em;
+  padding-top: 5px;
+}
+
+.close-awsome{
+  float: left;
+  margin-top: .2em;
+  padding:5px;
+}
+.close-awsome:hover {
+  background-color:#ddd;
+  border-radius: 15px;
+  cursor: pointer;
 }
 </style>

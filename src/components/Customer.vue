@@ -4,10 +4,10 @@
       <div class="col-2 text-center" v-if="!isPassenger">
         <img class="img-thumbnail margin-y" src="@/assets/logo.png" alt="">
         <button class="btn btn-primary text-center" v-on:click.prevent="upload()">Upload Photo</button>
-        <input type="file" class="d-none" id="profile-picture">
+        <input type="file" class="d-none" id="profile-picture" v-on:change="uploadingPic($event)">
       </div>
       <form :class="{'form-row': true, 'col-10': !isPassenger, 'col-12': isPassenger }" @submit.prevent="validateForm('customer-form')" data-vv-scope="customer-form"  autocomplete='off'>
-        <input-suggestion @modelSuggested="updateCustomer" :method="api.getSuggestedCustomers" @updateModel="updateName" :classes="'form-group col-6'" :label="'Ime'" :name="'name'" :formName="'customer-form'" :placeholder="'Ime Musterije'" :value="customer.ime"></input-suggestion>
+        <input-suggestion @modelSuggested="updateCustomer" @escapeSuggestion="setNewCustomer" :method="api.getSuggestedCustomers" @updateModel="updateName" :classes="'form-group col-6'" :label="'Ime'" :name="'name'" :formName="'customer-form'" :placeholder="'Ime Musterije'" :value="customer.ime"></input-suggestion>
         <div class="form-group col-6">
           <label for="surname">Prezime</label>
           <input type="text" v-bind:class="{'form-control': true, 'is-invalid': errors.has('customer-form.surname')}" id="surname" name="surname" placeholder="Prezime Musterije" v-model="customer.prezime" v-validate="'required|alpha_spaces'">
@@ -48,8 +48,9 @@
            <date-picker :date='startTime' @change="update" :option="option"></date-picker>
           <small id="passportHelp" class="form-text text-muted d-none error-msg">This is error message</small>
         </div>
-        <div class="form-group col-6">
-          <button class="btn btn-primary" v-on:click.prevent="addPassenger">Dodaj</button>
+        <div class="form-group col-12 text-right">
+          <button class="btn btn-primary" v-on:click.prevent="addCustomer" v-if="!isPassenger">Dodaj Musteriju</button>
+          <button class="btn btn-primary" v-on:click.prevent="addPassenger" v-if="isPassenger">Dodaj Putnika</button>
         </div>
       </form>
     </div>
@@ -63,10 +64,11 @@ import Api from '@/services/api.js'
 import Suggestion from '@/components/helpers/Suggestion'
 // import myDatepicker from '@/components/helpers/Datepicker.custom.vue' // custom Datepicker refined one
 import moment from 'moment'
+import router from '@/router'
 
 export default{
   name: 'customer',
-  props:{
+  props: {
     isPassenger: {
       type: Boolean
     }
@@ -75,6 +77,7 @@ export default{
     return {
       api: new Api(),
       focusedItem: 0,
+      formName: 'customer-form',
       customer: new Customer(),
       startTime: {
         time: moment().format('DD/MM/YYYY')
@@ -97,6 +100,10 @@ export default{
   computed: {
     name () {
       return this.customer.name
+    },
+    isNewCustomer () {
+      var id = this.isPassenger === true ? this.$store.getters.getCurentPassengerId : this.$store.getters.getCustomerId
+      return id === undefined
     }
   },
   components: {
@@ -104,22 +111,44 @@ export default{
     'input-suggestion': Suggestion
   },
   methods: {
-    updateCustomer (customer) {
-      this.customer = customer
+    updateCustomer (suggestedCustomer) {
+      this.customer = suggestedCustomer
+      if (this.isPassenger) {
+        this.$store.commit('setCurrentPassenger', this.customer)
+      } else {
+        this.$store.commit('setCustomer', this.customer)
+      }
     },
     addPassenger () {
-      this.$validator.validateAll('customer-form')
+      this.validateCustomerForm()
         .then((res) => {
           if (res) {
-            if(this.isPassenger){
-              console.log("emiting to modal")
-              this.$emit('addPassenger', this.customer)
-            } else{
-              this.api.saveCustomer(this.customer)
+            if (this.isNewCustomer) {
+              this.custmer.putnik = true
+              this.api.saveCustomer(this.customer).then(res => {
+                this.$store.commit('setCurrentPassengerId', res.data !== undefined ? res.data.id : undefined)
+              })
             }
+            this.$store.commit('storePassenger')
+            this.$emit('passengerAdded')
           }
-          console.log(res)
         })
+    },
+    addCustomer () {
+      this.validateCustomerForm()
+        .then((res) => {
+          if (res) {
+            if (this.isNewCustomer) {
+              this.api.saveCustomer(this.customer).then(res => {
+                this.$store.commit('setCustomerId', res.data !== undefined ? res.data.id : undefined)
+              })
+            }
+            router.push('navigation')
+          }
+        })
+    },
+    validateCustomerForm () {
+      return this.$validator.validateAll(this.formName)
     },
     upload () {
       document.getElementById('profile-picture').click()
@@ -137,6 +166,15 @@ export default{
             console.log(result)
           }
         })
+    },
+    uploadingPic ($event) {
+      console.log($event.target.value)
+      console.log('uploading')
+    },
+    setNewCustomer () {
+      this.customer = new Customer()
+      this.$validator.reset('customer-form')
+      this.$store.commit('setCustomer', this.customer)
     }
   },
   watch: {
