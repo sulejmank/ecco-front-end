@@ -1,13 +1,24 @@
 <template>
   <div class="container">
-    <div class="row">
+    <div class="row"  v-if="!isPassenger">
+      <div class="col colored">
+        <div class="customer row">
+          <div class="col-2 align-self-center">
+            <h4>
+              <strong>Musterije</strong>
+            </h4>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:20px">
       <div class="col-2 text-center" v-if="!isPassenger">
         <img class="img-thumbnail margin-y" src="@/assets/logo.png" alt="">
         <button class="btn btn-primary text-center" v-on:click.prevent="upload()">Upload Photo</button>
         <input type="file" class="d-none" id="profile-picture" v-on:change="uploadingPic($event)">
       </div>
       <form :class="{'form-row': true, 'col-10': !isPassenger, 'col-12': isPassenger }" @submit.prevent="validateForm('customer-form')" data-vv-scope="customer-form"  autocomplete='off'>
-        <input-suggestion @modelSuggested="updateCustomer" @escapeSuggestion="setNewCustomer" :method="api.getSuggestedCustomers" @updateModel="updateName" :classes="'form-group col-6'" :label="'Ime'" :name="'name'" :formName="'customer-form'" :placeholder="'Ime Musterije'" :value="customer.ime"></input-suggestion>
+        <input-suggestion @modelSuggested="updateCustomer" @escapeSuggestion="setNewCustomer" :method="api.getSuggestedCustomers" @updateModel="updateName" :classes="'form-group col-6'" :label="'Ime'" :fieldname="'ime'" :formName="formName" :placeholder="'Ime Musterije'" :value="customer.ime"></input-suggestion>
         <div class="form-group col-6">
           <label for="surname">Prezime</label>
           <input type="text" v-bind:class="{'form-control': true, 'is-invalid': errors.has('customer-form.surname')}" id="surname" name="surname" placeholder="Prezime Musterije" v-model="customer.prezime" v-validate="'required|alpha_spaces'">
@@ -45,8 +56,8 @@
         </div>
         <div class="form-group col-6">
           <label for="dateOfBirth">Datum Rodjenja</label>
-           <date-picker :date='startTime' @change="update" :option="option"></date-picker>
-          <small id="passportHelp" class="form-text text-muted d-none error-msg">This is error message</small>
+          <date-picker :date='startTime' @change="update" :hasErrors="isInFuture" :option="option"></date-picker>
+          <span class="form-text text-danger error-msg" v-show="isInFuture">{{birthdayErrorMessage}}</span>
         </div>
         <div class="form-group col-12 text-right">
           <button class="btn btn-primary" v-on:click.prevent="addCustomer" v-if="!isPassenger">Dodaj Musteriju</button>
@@ -59,10 +70,10 @@
 
 <script>
 import Customer from '@/models/Customer.js'
-import myDatepicker from 'vue-datepicker/vue-datepicker-es6.vue'
+// import myDatepicker from 'vue-datepicker/vue-datepicker-es6.vue'
 import Api from '@/services/api.js'
 import Suggestion from '@/components/helpers/Suggestion'
-// import myDatepicker from '@/components/helpers/Datepicker.custom.vue' // custom Datepicker refined one
+import myDatepicker from '@/components/helpers/Datepicker.custom.vue' // custom Datepicker refined one
 import moment from 'moment'
 import router from '@/router'
 
@@ -80,7 +91,7 @@ export default{
       formName: 'customer-form',
       customer: new Customer(),
       startTime: {
-        time: moment().format('DD/MM/YYYY')
+        time: ''
       },
       option: {
         type: 'day',
@@ -94,7 +105,8 @@ export default{
       mockSuggestions: [],
       status: 'unavailable',
       timer: undefined,
-      ajaxTimer: undefined
+      ajaxTimer: undefined,
+      birthdayErrorMessage: 'Datum rodjenja ne moze biti smesten u buducnosti'
     }
   },
   computed: {
@@ -104,6 +116,12 @@ export default{
     isNewCustomer () {
       var id = this.isPassenger === true ? this.$store.getters.getCurentPassengerId : this.$store.getters.getCustomerId
       return id === undefined
+    },
+    isInFuture () {
+      var dateOfBirth = new Date(moment(this.customer.datumRodjenja).toString())
+      console.log(this.customer.datumRodjenja)
+      console.log(dateOfBirth, new Date())
+      return dateOfBirth > new Date()
     }
   },
   components: {
@@ -124,26 +142,37 @@ export default{
         .then((res) => {
           if (res) {
             if (this.isNewCustomer) {
-              this.custmer.putnik = true
-              this.api.saveCustomer(this.customer).then(res => {
-                this.$store.commit('setCurrentPassengerId', res.data !== undefined ? res.data.id : undefined)
+              this.api.savePassanger(this.customer).then(res => {
+                console.log(res)
+                console.log(this.$store.state.currentPassenger)
+                console.log(this.$store.state.passangers)
+                this.customer = res.data
+                this.$store.dispatch('storePushPassanger', this.customer)
+                this.$emit('passengerAdded')
               })
+            } else {
+              this.$store.dispatch('storePushPassanger', this.customer)
+              this.$emit('passengerAdded')
             }
-            this.$store.commit('storePassenger')
-            this.$emit('passengerAdded')
           }
         })
     },
     addCustomer () {
       this.validateCustomerForm()
         .then((res) => {
-          if (res) {
+          if (res && !this.isInFuture) {
             if (this.isNewCustomer) {
               this.api.saveCustomer(this.customer).then(res => {
+                this.customer = res.data
                 this.$store.commit('setCustomerId', res.data !== undefined ? res.data.id : undefined)
+                router.push('navigation')
+              }).catch(err => {
+                console.log('Bad Request ' + err)
               })
+            } else {
+              router.push('navigation')
             }
-            router.push('navigation')
+            this.$store.commit('setCustomer', this.customer)
           }
         })
     },
@@ -154,7 +183,8 @@ export default{
       document.getElementById('profile-picture').click()
     },
     update (event) {
-      this.customer.datumRodjenja = moment().format('YYYY-MM-DD', event)
+      this.customer.datumRodjenja = moment(event, 'DD/MM/YYYY').format('YYYY-MM-DD')
+      console.log(this.isInFuture)
     },
     updateName (title) {
       this.customer.ime = title
@@ -174,15 +204,20 @@ export default{
     setNewCustomer () {
       this.customer = new Customer()
       this.$validator.reset('customer-form')
-      this.$store.commit('setCustomer', this.customer)
+      if (this.isPassenger) {
+        this.$store.commit('setCurrentPassenger', this.customer)
+      } else {
+        this.$store.commit('setCustomer', this.customer)
+      }
     }
-  },
-  watch: {
   }
 }
 </script>
 
 <style>
+.colored {
+  background-color:#ddd;
+}
 .margin-y{
   margin:5px 0;
 }

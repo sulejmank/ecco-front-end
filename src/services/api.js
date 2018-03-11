@@ -5,8 +5,6 @@ import Suggestion from '@/models/Suggestion.js'
 export default class Api {
   constructor () {
     this.baseUrl = 'http://ecco.local'
-    this.googleUrl = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?'
-    this.apiKey = 'key=AIzaSyD26SxqE4hlzjbpJ99pFOdrSv62c_Bjgx8'
   }
   getSuggestedCustomers (input) {
     return axios.get(this.api.baseUrl + '/api/relevantCustomer?search=' + input).then(
@@ -24,27 +22,12 @@ export default class Api {
   }
 
   saveCustomer (customer) {
-    axios.post(this.baseUrl + '/api/addCustomer', customer).then(
-      response => {
-        console.log(response)
-        return response
-      }, errorMsg => {
-        console.log(errorMsg)
-        return errorMsg
-      }
-    )
+    return axios.post(this.baseUrl + '/api/addCustomer', customer)
   }
 
   savePassanger (customer) {
     customer.putnik = true
-    axios.post(this.baseUrl + '/api/addCustomer', customer).then(
-      response => {
-        console.log(response)
-        return response
-      }, errorMsg => {
-        console.log(errorMsg)
-      }
-    )
+    return axios.post(this.baseUrl + '/api/addCustomer', customer)
   }
 
   getPlaceSuggestion (input) {

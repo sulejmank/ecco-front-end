@@ -1,8 +1,8 @@
 <template>
 <div :class="classes">
-  <label :for="name">{{label}}</label>
-  <input type="text" :class="{'form-control': true, 'is-invalid': errors.has(formName +'.'+ name)}" v-bind:id="name" v-bind:name="name" :placeholder="placeholder" v-model="model" v-validate="'required: true, alpha_spaces: true, regex: ^[\d,\s]+$'" v-on:keydown.down.prevent="focusSuggestions('down')" v-on:keydown.up.prevent="focusSuggestions('up')" v-on:blur="unfocused()" v-on:keydown.esc.prevent="escapeMessage" autocomplete="new-suggestion">
-  <span v-show="errors.has(formName +'.'+ name)" id="nameHelp" class="form-text text-danger error-msg">{{ errors.first(formName +'.'+ name) }}</span>
+  <label :for="fieldname">{{label}}</label>
+  <input type="text" :class="{'form-control': true, 'is-invalid': errors.has(formName +'.'+ fieldname)}" v-bind:id="fieldname" v-bind:name="fieldname" :placeholder="placeholder" v-model="model" v-validate="'required: true, alpha_spaces: true, regex: ^[\d,\s]+$'" v-on:keydown.down.prevent="focusSuggestions('down')" v-on:keydown.up.prevent="focusSuggestions('up')" v-on:blur="unfocused()" v-on:keydown.esc.prevent="escapeMessage" autocomplete="new-suggestion">
+  <span v-show="errors.has(formName +'.'+ fieldname)" id="nameHelp" class="form-text text-danger error-msg">{{ errors.first(formName +'.'+ fieldname) }}</span>
   <div class="suggestions" v-show="status == 'loading'">
     <div :class="{'customer row':true, 'focused': isFocusedItem(i)}" v-for="(suggestion, i) in suggestions" :key="suggestion.id" v-show="suggestions.length > 0">
       <div class="col-2">
@@ -31,7 +31,7 @@ export default {
     value: {
       type: String
     },
-    name: {
+    fieldname: {
       type: String
     },
     classes: {
@@ -57,7 +57,6 @@ export default {
       status: undefined,
       suggestions: [],
       focusedItem: 0
-      // errors: this.$parent.$validator.errors
     }
   },
   methods: {
@@ -67,7 +66,7 @@ export default {
     },
     getSuggestions (input) {
       this.focusedItem = 0
-      this.$validator.validate(this.formName + '.' + this.name).then(res => {
+      this.$validator.validate(this.formName + '.' + this.fieldname).then(res => {
         if (res) {
           this.status = undefined
           clearTimeout(this.timer)
