@@ -4,7 +4,7 @@ import Suggestion from '@/models/Suggestion.js'
 
 export default class Api {
   constructor () {
-    this.baseUrl = 'http://localhost:3000' // vrati na ecco.local
+    this.baseUrl = 'eco.local' // vrati na ecco.local
   }
   getSuggestedCustomers (input) {
     return axios.get(this.api.baseUrl + '/api/relevantKlijent?search=' + input).then(

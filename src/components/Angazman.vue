@@ -207,7 +207,7 @@ export default {
         .then(res => {
           console.log(res)
           for(let i = 0; i < res.data.length; i++)
-            this.angazmani.push(res.data[i])   
+            this.angazmani.unshift(res.data[i])   
           console.log(angazmani)
       })
     },
@@ -222,6 +222,7 @@ export default {
           this.$store.commit('removePassanger', idPutnika)
           this.getAngazmani()
             alert("Sacuvano!")
+          this.removePassanger(idPutnika)
         })
       },
     removePassanger (i) {
