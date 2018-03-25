@@ -13,7 +13,7 @@
     </div>
     <div class="row" style="margin-top:20px">
       <div class="col-2 text-center" v-if="!isPassenger">
-        <img class="img-thumbnail margin-y" src="https://i.imgur.com/BjP9MgO.png" alt="">
+        <img class="img-thumbnail margin-y" id="slika" src="https://i.imgur.com/BjP9MgO.png" alt="">
         <button class="btn btn-primary text-center" v-on:click.prevent="upload()">Upload Photo</button>
         <input type="file" accept="image/*" class="d-none" id="profile-picture" v-on:change="uploadingPic($event)">
       </div>
@@ -90,6 +90,7 @@ export default{
       focusedItem: 0,
       formName: 'customer-form',
       customer: new Customer(),
+      urlslike: "",
       startTime: {
         time: ''
       },
@@ -200,10 +201,12 @@ export default{
     uploadingPic ($event) {
       this.api.uploadPhoto($event).then(res => {
         console.log(res.data.urlSlike)
+        document.getElementById('slika').src = res.data.urlSlike
       })
       .catch(err => {
         console.log(err);
       })
+
       console.log($event.target.value)
       console.log('uploading')
     },
