@@ -4,10 +4,10 @@ import Suggestion from '@/models/Suggestion.js'
 
 export default class Api {
   constructor () {
-    this.baseUrl = 'http://ecco.local'
+    this.baseUrl = 'http://localhost:3000' // vrati na ecco.local
   }
   getSuggestedCustomers (input) {
-    return axios.get(this.api.baseUrl + '/api/relevantCustomer?search=' + input).then(
+    return axios.get(this.api.baseUrl + '/api/relevantKlijent?search=' + input).then(
       res => {
         if (res.data !== undefined) {
           var customerSuggestions = res.data.map(el => {
@@ -21,13 +21,31 @@ export default class Api {
       })
   }
 
+  uploadPhoto (event) {
+    let data = new FormData()
+    data.append('image', event.target.files[0])
+
+    return axios.post(this.baseUrl + '/api/upload', data)
+  }
   saveCustomer (customer) {
-    return axios.post(this.baseUrl + '/api/addCustomer', customer)
+    return axios.post(this.baseUrl + '/api/addKlijent', customer)
+  }
+
+  addPassToAng (idPutnika, idAngazmana) {
+    return axios.post(this.baseUrl + '/api/addtoang', {idPutnika: idPutnika, idAngazmana: idAngazmana})
+  }
+
+  getAngazmani () {
+    return axios.get(this.baseUrl + '/api/angazmani')
+  }
+
+  saveAngazman (ang) {
+    return axios.post(this.baseUrl + '/api/addAng', ang)
   }
 
   savePassanger (customer) {
     customer.putnik = true
-    return axios.post(this.baseUrl + '/api/addCustomer', customer)
+    return axios.post(this.baseUrl + '/api/addKlijent', customer)
   }
 
   getPlaceSuggestion (input) {

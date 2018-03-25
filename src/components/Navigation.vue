@@ -16,7 +16,7 @@
           <i class="fas fa-plane"></i>
           <h3>Avio Karte</h3>
       </router-link>
-      <router-link class="col-4 text-center product" to="customer">
+      <router-link class="col-4 text-center product" to="angazman">
           <i class="fas fa-suitcase"></i>
           <h3>Angazmani</h3>
       </router-link>

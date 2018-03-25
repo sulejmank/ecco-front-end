@@ -8,7 +8,6 @@ import VeeValidate from 'vee-validate'
 import { store } from './store/store.js'
 import BootstrapVue from 'bootstrap-vue'
 
-
 Vue.config.productionTip = false
 Vue.use(VeeValidate)
 Vue.use(BootstrapVue)

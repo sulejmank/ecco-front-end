@@ -127,8 +127,8 @@ export const store = new Vuex.Store({
         'updatedAt': '2018-03-09T21:43:14.000Z',
         'urlSlike': 'https://s.ytimg.com/yts/img/avatar_720-vflYJnzBZ.png'
       }
-    ]
-    }, //return state.allPassangers
+      ]
+    }, // return state.allPassangers
     getPassangerById: (state, id) => {
       var passenger
       state.allPassangers.forEach(el => {

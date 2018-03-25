@@ -13,9 +13,9 @@
     </div>
     <div class="row" style="margin-top:20px">
       <div class="col-2 text-center" v-if="!isPassenger">
-        <img class="img-thumbnail margin-y" src="@/assets/logo.png" alt="">
+        <img class="img-thumbnail margin-y" src="https://i.imgur.com/BjP9MgO.png" alt="">
         <button class="btn btn-primary text-center" v-on:click.prevent="upload()">Upload Photo</button>
-        <input type="file" class="d-none" id="profile-picture" v-on:change="uploadingPic($event)">
+        <input type="file" accept="image/*" class="d-none" id="profile-picture" v-on:change="uploadingPic($event)">
       </div>
       <form :class="{'form-row': true, 'col-10': !isPassenger, 'col-12': isPassenger }" @submit.prevent="validateForm('customer-form')" data-vv-scope="customer-form"  autocomplete='off'>
         <input-suggestion @modelSuggested="updateCustomer" @escapeSuggestion="setNewCustomer" :method="api.getSuggestedCustomers" @updateModel="updateName" :classes="'form-group col-6'" :label="'Ime'" :fieldname="'ime'" :formName="formName" :placeholder="'Ime Musterije'" :value="customer.ime"></input-suggestion>
@@ -198,6 +198,12 @@ export default{
         })
     },
     uploadingPic ($event) {
+      this.api.uploadPhoto($event).then(res => {
+        console.log(res.data.urlSlike)
+      })
+      .catch(err => {
+        console.log(err);
+      })
       console.log($event.target.value)
       console.log('uploading')
     },
