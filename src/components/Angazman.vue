@@ -207,7 +207,7 @@ export default {
         .then(res => {
           console.log(res)
           for(let i = 0; i < res.data.length; i++)
-            this.angazmani.unshift(res.data[i])   
+            this.angazmani.push(res.data[i])   
           console.log(angazmani)
       })
     },

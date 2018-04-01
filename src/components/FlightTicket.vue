@@ -229,8 +229,12 @@ export default{
       this.validateFlightTicketForm().then(res => {
         if (res) {
           var flightTickets = this.ticketIds.map(el => {
-            return new FlightTicket(el.passangerId, this.ticket.putovanjeOd, this.ticket.putovanjeDo, this.roundTrip, this.ticket.datumPolaska, this.ticket.datumDolaska, el.ticketId, this.ticket.avioKompanija, false, this.ticket.cena, new Date())
+            return  new FlightTicket(el.passangerId, this.ticket.putovanjeOd, this.ticket.putovanjeDo, this.roundTrip, this.ticket.datumPolaska, this.ticket.datumDolaska, el.ticketId, this.ticket.avioKompanija, false, this.ticket.cena, new Date())
           })
+          this.api.makePurchase(flightTickets)
+            .then(res => {
+              console.log(res);
+            })
           console.log(flightTickets)
           this.$store.commit('addFlightTickets', flightTickets)
           this.$store.commit('removeAllPassanger')

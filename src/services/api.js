@@ -4,7 +4,7 @@ import Suggestion from '@/models/Suggestion.js'
 
 export default class Api {
   constructor () {
-    this.baseUrl = 'eco.local' // vrati na ecco.local
+    this.baseUrl = 'http://localhost:3000' // vrati na ecco.local
   }
   getSuggestedCustomers (input) {
     return axios.get(this.api.baseUrl + '/api/relevantKlijent?search=' + input).then(
@@ -46,6 +46,22 @@ export default class Api {
   savePassanger (customer) {
     customer.putnik = true
     return axios.post(this.baseUrl + '/api/addKlijent', customer)
+  }
+
+  makePurchase (flightTickets) {
+    return axios.post(this.baseUrl + '/api/addAvio', flightTickets[0])
+  }
+
+  getKarte () {
+    return axios.get(this.baseUrl + '/api/karte')
+  }
+
+  checkTicket (uid) {
+    return axios.post(this.baseUrl + '/api/checkTicket', {id: uid})
+  }
+  
+  getPutnik (id) {
+    return axios.post(this.baseUrl + '/api/putnik', {id: id})
   }
 
   getPlaceSuggestion (input) {

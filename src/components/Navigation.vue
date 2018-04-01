@@ -20,7 +20,7 @@
           <i class="fas fa-suitcase"></i>
           <h3>Angazmani</h3>
       </router-link>
-      <router-link class="col-4 text-center product" to="customer">
+      <router-link class="col-4 text-center product" to="statistic">
           <i class="fas fa-chart-pie"></i>
           <h3>Statistika</h3>
       </router-link>

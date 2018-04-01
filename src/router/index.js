@@ -5,6 +5,7 @@ import Navigation from '@/components/Navigation'
 import FlightTicket from '@/components/FlightTicket'
 import Checkout from '@/components/Checkout'
 import Angazman from '@/components/Angazman'
+import Statistic from '@/components/Statistic'
 
 Vue.use(Router)
 
@@ -34,6 +35,11 @@ export default new Router({
       path: '/angazman',
       name: 'Angazman',
       component: Angazman
+    },
+    {
+      path: '/statistic',
+      name: 'Statistic',
+      component: Statistic
     }
   ]
 })
