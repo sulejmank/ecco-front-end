@@ -9,7 +9,7 @@
                 <b-btn v-b-toggle.collapse1 variant="dark" class="btn put" v-on:click.prevent="Putnik(karta.KlijentId)" >Putnik</b-btn>
                   <b-collapse id="collapse1" class="mt-2">
                     <b-card>
-                       <p class="card-text text-center"><strong>{{putnik.ime + ' ' + putnik.prezime}}</strong></p>
+                       <p class="card-text text-center" v-if="putnik.id === karta.KlijentId"><strong>{{putnik.ime + ' ' + putnik.prezime}}</strong></p>
                     </b-card>
                   </b-collapse><br>
                   <hr class="custom-hr">
