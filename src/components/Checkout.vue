@@ -15,23 +15,51 @@
     </div>
   </div>
   <div class="row" style="margin-top: 2%;">
-    <div class="col-5">
+    <div class="col-12">
       <div class="card bg-light mb-3">
-        <div class="card-header">Flight Tickets</div>
-        <div class="card-body custom-card-body" v-for="ticket in flightTickets" :key="ticket.id">
-          <p class="card-title text-center trip">{{ticket.putovanjeOd}} </p>
-          <p class="text-center trip"><i :class="{'fas fa-long-arrow-alt-down': !ticket.jedanParvac, 'fas fa-arrows-alt-v': ticket.jedanParvac}"></i></p>
-          <p class="card-title text-center trip">{{ticket.putovanjeDo}}</p>
-          <p class="sized-margins">Putnik: <strong style="float:right">{{getPassangerById(ticket.idPutnika)}}</strong></p>
-          <p class="sized-margins">ID Rezervacije: <strong style="float:right">{{ticket.brojRezervacije}}</strong></p>
-          <p class="sized-margins">Datum putovanja: <strong style="float:right">{{ticket.datumPolaska}}</strong></p>
-          <p class="sized-margins" v-if="ticket.jedanParvac">Datum povratka: <strong style="float:right">{{ticket.datumDolaska}}</strong></p>
-          <p class="sized-margins">Avio kompanija: <strong style="float:right">{{ticket.avioKompanija}}</strong></p>
-          <p class="sized-margins">Cena: <strong style="float:right">{{ticket.cena | decimal }}</strong></p>
-          <hr class="custom-hr">
+        <div class="card-header">Kupovine</div>
+        <div class="card-body  " v-for="(kup, index) in kupovine[0].musterije" :key="kup.id">
+          <div class="card-header text-center">
+          <b-btn  v-b-toggle.collapse`${index}` variant="outline-secondary" class="btn-lg">{{kup.ime + ' ' + kup.prezime}}</b-btn>
+            <b-collapse id="collapse`${index}`" class="mt-2">
+              <b-card bg-variant="secondary" text-variant="white">
+                  <p class="card-text"><strong class="float-left">Broj pasosa: <i>{{kup.brojPasosa}}</i></strong> <strong>Broj telefona: <i>{{kup.brojTelefona}} </i> </strong><strong class="float-right">Adresa: <i>{{kup.adresa}} </i></strong></p>
+              </b-card>
+            </b-collapse>
+          </div>
+              <div class="card-body " v-for="(produkt,i) in kupovine[0].musterije[index].produkti" :key="produkt.id">           
+                
+                <b-card bg-variant="secondary"
+                        text-variant="white"
+                        class="">
+                <div v-if="!produkt.status"><i class="fas fa-check-circle"></i></div>        
+                  <p class="card-text text-center"><strong> Datum kupovine: </strong><i>{{produkt.createdAt}}</i></p>
+                  <hr class="custom-hr">
+                  <p class="card-text prod"><strong>Cena: </strong><b-badge variant="light">{{produkt.totalnaCena}}€</b-badge></p>
+                <div class="form-group col-12 bottom-margin extra-padding" v-if="!produkt.status">
+                  <p class="bottom-margin">
+                    <label class="switch">
+                      <input type="checkbox" v-model="avans" name="round-trip" id="round-trip">
+                      <span class="slider round"></span>
+                      </label>
+                      <label for="round-trip" class="custom-label">Avans</label>
+                  </p>
+                </div>
+                                
+                <div class="form-group col-4" style="min-height:40px" >
+                  <vue-numeric v-show="avans" :currency="'€'" :separator="'.'" :classes="'form-control text-center'" v-model="avansAmount" :decimal-separator="','" :precision="2"></vue-numeric>
+                  <span v-show="avans" id="nameHelp" class="form-text text-danger error-msg"></span> <!-- v-show="errors.has('customer-form.surname')"  {{ errors.first('customer-form.surname') }}-->
+                  <hr class="custom-hr">
+                </div>
+                <div class="col-4">
+                  <b-btn class="btn btn-lg btn-default" v-on:click="addMoreInstallments">Dodaj Ratu</b-btn>
+                </div>
+                </b-card>
+                <hr class="custom-hr">
+              </div>
         </div>
         <div class="card-body">
-          <p>Ukupno: <strong style="float:right">{{sumedPrice| decimal }}</strong></p>
+          <p>Ukupno: <strong style="float:right"></strong></p>
         </div>
       </div>
     </div>
@@ -104,6 +132,7 @@ import bButtonGroup from 'bootstrap-vue/es/components/button-group/button-group'
 import myDatepicker from '@/components/helpers/Datepicker.custom.vue'
 import VueNumeric from '@/components/helpers/Numeric.custom'
 import Installment from '@/models/Installment'
+import Api from '@/services/api.js'
 
 
 export default{
@@ -126,6 +155,8 @@ export default{
       paymentMethod: '',
       avans: false,
       avansAmount: 0,
+      kupovine: [],
+      api: new Api(),
       returnTime: {
         time: ''
       },
@@ -174,7 +205,17 @@ export default{
     },
     checkout () {
       console.log(this.installments)
+    },
+    Kupovine () {
+      this.api.getKupovine()
+        .then(res => {
+            this.kupovine.push(res.data) 
+            console.log(this.kupovine[0].musterije)
+        })
     }
+  },
+  beforeMount() {
+    this.Kupovine()
   }
 }
 </script>
@@ -208,7 +249,9 @@ export default{
     right: -1em;
     top: 2em;
 }
-
+.prod {
+  font-size: 1.2em;
+}
 .close-awsome{
   margin-top: .2em;
   padding:5px;

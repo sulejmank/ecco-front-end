@@ -7,15 +7,12 @@
             <div class="card-header text-center">Avio Karta</div>
               <div class="card-body custom-card-body">
                 <b-btn v-b-toggle.collapse1 variant="dark" class="btn put" v-on:click.prevent="Putnik(karta.KlijentId)" >Putnik</b-btn>
-                  <b-collapse id="collapse1" class="mt-2">
-                    <b-card>
-                       <p class="card-text text-center" v-if="putnik.id === karta.KlijentId"><strong>{{putnik.ime + ' ' + putnik.prezime}}</strong></p>
-                    </b-card>
-                  </b-collapse><br>
+                <hr class="custom-hr">
+                   <p class="card-text text-center" v-if="putnik.id === karta.KlijentId"><strong>{{putnik.ime + ' ' + putnik.prezime}}</strong></p>
                   <hr class="custom-hr">
-                  <p class="sized-margins">Od: <strong style="float:right">{{karta.putovanjeOd}}</strong></p>
+                  <p class="card-title text-center trip">{{karta.putovanjeOd}} </p>
                   <p class="text-center trip"><i :class="{'fas fa-long-arrow-alt-down': !karta.jedanParvac, 'fas fa-arrows-alt-v': karta.jedanParvac}"></i></p>
-                  <p class="sized-margins">Do: <strong style="float:right">{{karta.putovanjeDo}}</strong></p>
+                  <p class="card-title text-center trip">{{karta.putovanjeDo}} </p>
                   <p class="sized-margins">Cena: <strong style="float:right">{{karta.cena | decimal }}€</strong></p>
                   <p class="sized-margins">Datum Polaska: <strong style="float:right">{{karta.datumPolaska}}</strong></p>
                   <p class="sized-margins" v-if="karta.jedanParvac">Datum povratka: <strong style="float:right">{{karta.datumDolaska}}</strong></p>
@@ -26,6 +23,8 @@
                   <button class="btn btn-dark put text-center" v-on:click.prevent="check(karta.id)" v-if="!karta.potvrdjeno">Potvrdi kartu</button>
               </div>
           </div>
+        </b-tab>
+        <b-tab title="Nesto drugo">
         </b-tab>
       </b-tabs>
     </b-card>
@@ -90,6 +89,9 @@ import Api from '@/services/api.js'
 .put {
   width: 100%;
 }
-
+.trip{
+  margin-bottom:0;
+  font-style:1.5em
+}
 
 </style>

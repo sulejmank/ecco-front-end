@@ -64,6 +64,10 @@ export default class Api {
     return axios.post(this.baseUrl + '/api/putnik', {id: id})
   }
 
+  getKupovine () {
+    return axios.get(this.baseUrl + '/api/purchases')
+  }
+
   getPlaceSuggestion (input) {
     return axios.get(this.api.baseUrl + '/api/search' + '?input=' + encodeURI(input)).then(
       res => {
