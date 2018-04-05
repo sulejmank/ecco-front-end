@@ -58,6 +58,15 @@
                 <hr class="custom-hr">
               </div>
         </div>
+<!-- za chek-out 
+  napravimo listu klijenata u tabeli tipa, moze i search neki da ima i na odabir klijenta
+  da se otvori njegov profil sa informacijama o njemu i njegove kupovine sa opcijama i sve
+
+  -->
+
+
+
+
         <div class="card-body">
           <p>Ukupno: <strong style="float:right"></strong></p>
         </div>
@@ -205,17 +214,7 @@ export default{
     },
     checkout () {
       console.log(this.installments)
-    },
-    Kupovine () {
-      this.api.getKupovine()
-        .then(res => {
-            this.kupovine.push(res.data) 
-            console.log(this.kupovine[0].musterije)
-        })
     }
-  },
-  beforeMount() {
-    this.Kupovine()
   }
 }
 </script>

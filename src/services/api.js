@@ -4,7 +4,7 @@ import Suggestion from '@/models/Suggestion.js'
 
 export default class Api {
   constructor () {
-    this.baseUrl = 'ecco.local' // vrati na ecco.local
+    this.baseUrl = 'http://localhost:3000' // vrati na ecco.local
   }
   getSuggestedCustomers (input) {
     return axios.get(this.api.baseUrl + '/api/relevantKlijent?search=' + input).then(
@@ -64,7 +64,7 @@ export default class Api {
     return axios.post(this.baseUrl + '/api/putnik', {id: id})
   }
 
-  getKupovine () {
+  getNoveKupovine () {
     return axios.get(this.baseUrl + '/api/purchases')
   }
 
