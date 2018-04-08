@@ -1,80 +1,43 @@
 <template>
 <div class="container">
-  <div class="row">
-    <div class="col colored">
-      <div class="customer row">
-        <div class="col-2 align-self-center">
-          <h4>
-            <strong>Naplata</strong>
-          </h4>
-        </div>
-        <div class="col text-right">
-          <button class="btn btn-light" v-on:click.prevent="checkout">Gotovo</button>
-        </div>
-      </div>
+  <div class="row products-row">
+    <router-link class="col-2 text-center product"  to="navigation">
+        <i class="fas fa-bars"></i>
+    </router-link>
+    <router-link class="col-2 text-center product" to="flight-ticket" >
+        <i class="fas fa-plane"></i>
+    </router-link>
+    <router-link class="col-2 text-center product" to="angazman">
+        <i class="fas fa-suitcase"></i>
+    </router-link>
+    <router-link class="col-2 text-center product" to="statistic">
+          <i class="fas fa-chart-pie"></i>
+    </router-link>
+    <router-link class="col-2 text-center product" to="customer">
+          <i class="fas fa-address-card"></i>
+      </router-link>
+      <router-link class="col-2 text-center product"  to="customer">
+          <i class="fas fa-exchange-alt"></i>
+      </router-link>
     </div>
-  </div>
+        <hr class="custom-hr">
+        <br>
+ 
   <div class="row" style="margin-top: 2%;">
     <div class="col-12">
-      <div class="card bg-light mb-3">
-        <div class="card-header">Kupovine</div>
-        <div class="card-body  " v-for="(kup, index) in kupovine[0].musterije" :key="kup.id">
-          <div class="card-header text-center">
-          <b-btn  v-b-toggle.collapse`${index}` variant="outline-secondary" class="btn-lg">{{kup.ime + ' ' + kup.prezime}}</b-btn>
-            <b-collapse id="collapse`${index}`" class="mt-2">
-              <b-card bg-variant="secondary" text-variant="white">
-                  <p class="card-text"><strong class="float-left">Broj pasosa: <i>{{kup.brojPasosa}}</i></strong> <strong>Broj telefona: <i>{{kup.brojTelefona}} </i> </strong><strong class="float-right">Adresa: <i>{{kup.adresa}} </i></strong></p>
-              </b-card>
-            </b-collapse>
+      <div>
+          <h2>Klijent: </h2> 
+          <div v-if="klijent.id == undefined">
+            <button class="btn btn-default"  v-on:click.prevent="addKlijent" type="button"><i class="fas fa-plus-circle"></i>Dodaj Klijenta</button><br>            <hr class="custom-hr">
           </div>
-              <div class="card-body " v-for="(produkt,i) in kupovine[0].musterije[index].produkti" :key="produkt.id">           
-                
-                <b-card bg-variant="secondary"
-                        text-variant="white"
-                        class="">
-                <div v-if="!produkt.status"><i class="fas fa-check-circle"></i></div>        
-                  <p class="card-text text-center"><strong> Datum kupovine: </strong><i>{{produkt.createdAt}}</i></p>
-                  <hr class="custom-hr">
-                  <p class="card-text prod"><strong>Cena: </strong><b-badge variant="light">{{produkt.totalnaCena}}€</b-badge></p>
-                <div class="form-group col-12 bottom-margin extra-padding" v-if="!produkt.status">
-                  <p class="bottom-margin">
-                    <label class="switch">
-                      <input type="checkbox" v-model="avans" name="round-trip" id="round-trip">
-                      <span class="slider round"></span>
-                      </label>
-                      <label for="round-trip" class="custom-label">Avans</label>
-                  </p>
-                </div>
-                                
-                <div class="form-group col-4" style="min-height:40px" >
-                  <vue-numeric v-show="avans" :currency="'€'" :separator="'.'" :classes="'form-control text-center'" v-model="avansAmount" :decimal-separator="','" :precision="2"></vue-numeric>
-                  <span v-show="avans" id="nameHelp" class="form-text text-danger error-msg"></span> <!-- v-show="errors.has('customer-form.surname')"  {{ errors.first('customer-form.surname') }}-->
-                  <hr class="custom-hr">
-                </div>
-                <div class="col-4">
-                  <b-btn class="btn btn-lg btn-default" v-on:click="addMoreInstallments">Dodaj Ratu</b-btn>
-                </div>
-                </b-card>
-                <hr class="custom-hr">
-              </div>
-        </div>
-<!-- za chek-out 
-  napravimo listu klijenata u tabeli tipa, moze i search neki da ima i na odabir klijenta
-  da se otvori njegov profil sa informacijama o njemu i njegove kupovine sa opcijama i sve
-
-  -->
-
-
-
-
-        <div class="card-body">
-          <p>Ukupno: <strong style="float:right"></strong></p>
+          <h2>Produkti:  </h2>
+            <button class="btn btn-default"  v-on:click.prevent="" type="button"><i class="fas fa-plus-circle"></i>Dodaj Produkt</button><br>            <hr class="custom-hr">
         </div>
       </div>
     </div>
     <div class="col-7">
       <div class="form-group">
-        <h3>cena<span class="" style="float:right;font-size:2em">{{sumedPrice}}</span></h3>
+        <h3>Ukupno:<span class="" style="float:right;font-size:2em">{{sumedPrice}}</span></h3>
         <div class="clearfix"></div>
       </div>
       <div class="form-group text-center">
@@ -130,11 +93,17 @@
       <div class="row" v-if="paymentMethod == 'installments'">
         <div class="col-12">
           <button class="btn btn-default btn-lg btn-block" v-on:click="addMoreInstallments">Dodaj Ratu</button>
+          <br>
+           <hr class="custom-hr">
+          <button class="btn btn-default btn-lg btn-block" v-on:click="">Zavrsi kupovinu</button>
+          <br>
+          <hr class="custom-hr">
         </div>
+       
       </div>
     </div>
+      <modal v-if="show" @closeModal="show = false"></modal>
   </div>
-</div>
 </template>
 <script>
 import bButtonGroup from 'bootstrap-vue/es/components/button-group/button-group';
@@ -142,6 +111,8 @@ import myDatepicker from '@/components/helpers/Datepicker.custom.vue'
 import VueNumeric from '@/components/helpers/Numeric.custom'
 import Installment from '@/models/Installment'
 import Api from '@/services/api.js'
+import Customer from '@/models/Customer'
+import PassangerModal from '@/components/helpers/PassangerModal'
 
 
 export default{
@@ -149,7 +120,8 @@ export default{
   components: {
     'b-button-group': bButtonGroup,
     'vue-numeric': VueNumeric,
-    'date-picker': myDatepicker
+    'date-picker': myDatepicker,
+    'modal': PassangerModal
   },
   computed: {
     flightTickets () {
@@ -164,8 +136,10 @@ export default{
       paymentMethod: '',
       avans: false,
       avansAmount: 0,
+      show: false,
       kupovine: [],
       api: new Api(),
+      klijent: new Customer(),
       returnTime: {
         time: ''
       },
@@ -202,6 +176,9 @@ export default{
     },
     setPaymentMethod (method) {
       this.paymentMethod = method
+    },
+    addKlijent () {
+      this.show = true;
     },
     updateReturnTime () {
       console.log('It\'s OK bro.. ')
@@ -260,5 +237,40 @@ export default{
   border-radius: 15px;
   cursor: pointer;
 }
+.product {
+  padding-top:5%;
+  padding-bottom:5%;
+  background-color:#fff;
+  z-index:10;
+  transition:all .2s ease 0s;
+  color:#000;
+  text-decoration: none;
+}
+
+.product i {
+  font-size:3em;
+  color:#000;
+  text-decoration: none;
+}
+.product h3, .product:hover h3 {
+  color:#000;
+  text-decoration: none;
+}
+#ak {
+  box-shadow: 0px 0px 15px #ddd;
+  z-index:11;
+  transform:translateY(-4px);
+}
+
+.product:hover {
+  box-shadow: 0px 0px 15px #ddd;
+  z-index:11;
+  transform:translateY(-4px);
+}
+.products-row {
+  margin: 20px 0%;
+  border: 1px solid #ddd;
+}
+
 
 </style>
