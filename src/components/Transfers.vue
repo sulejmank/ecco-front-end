@@ -1,11 +1,14 @@
 <template>
+
 <div class="">
+  <navbar></navbar>
+  <!--  
     <navbar></navbar>
  <div class="row forma">
    <div class="col-4 ang">
       <div class="card bg-light mb-3">
-        <div class="card-header">Anganzmani</div>
-          <div class="card-body custom-card-body" v-for="angazman in angazmani" :key="angazman.id">
+        <div class="card-header">Transferi</div>
+          <div class="card-body custom-card-body" v-for="transfer in transferi" :key="transfer.id">
             <p class="card-title text-center trip"></p>
             <p class="sized-margins">Destinacija: <strong style="float:right">{{angazman.destinacija}}</strong></p>
             <p class="sized-margins">Hotel: <strong style="float:right">{{angazman.hotel}}</strong></p>
@@ -20,7 +23,7 @@
             <hr class="custom-hr">
           </div>
         </div>
-      </div>
+      </div> 
       <div class="col-6 forma">
       <b-form @submit="onSubmit"
                       label="Napravi Angazman">    
@@ -103,16 +106,16 @@
                         placeholder="€ 0,00">
           </b-form-input>
         </b-form-group>
-        <b-button type="submit" variant="dark">Napravi Anganzman</b-button>
+        <b-button type="submit" variant="dark">Napravi Aganzman</b-button>
       </b-form>
-    </div>
+     </div>
     <modal v-if="show" @closeModal="show = false"></modal>
-  </div>
-</div>
+  </div> 
+--></div>
+
 </template>
 
 <script>
-import Angazman from '@/models/Angazman.js'
 import Api from '@/services/api.js'
 import PassangerModal from '@/components/helpers/PassangerModal'
 import Customer from '@/models/Customer.js'
@@ -141,19 +144,6 @@ export default {
       api: new Api(), 
       passengers: [],
       passanger: new Customer(),
-      strukture: [
-        {value: null, text:"Izaberete opciju"},
-        {value:'1-krevetna', text:'1-krevetna'},
-        {value:'2-krevetna', text:'2-krevetna'},
-        {value:'3-krevetna', text:'3-krevetna'},
-        {value:'4-krevetna', text:'4-krevetna'}
-      ],
-      usluge: [
-        {value: null, text:"Izaberete opciju" },
-        {value: 'polu-pansion', text: "Polu-Pansion"},
-        {value: 'pun-pansion', text: "Pun-Pansion"},
-        {value: 'bez', text: "Bez"}
-      ]
     }
   },
   methods: {
@@ -191,42 +181,9 @@ export default {
         this.form.strukturaSobe =  null,
         this.form.cena = ' '
     },
-    addCustomer (event) {
-     // console.log(event);
-      this.passangers.push(event)
-      //console.log(this.passenger)
-    },
-    getAngazmani() {
-      this.api.getAngazmani()
-        .then(res => {
-          console.log(res)
-          for(let i = 0; i < res.data.length; i++)
-            this.angazmani.push(res.data[i])   
-          console.log(angazmani)
-      })
-    },
-    addPassenger (event) {
-      this.show = true
-      console.log(event)
-    },
-    addToAngazman (idPutnika, idAngazmana) {
-      this.api.addPassToAng(idPutnika, idAngazmana)
-        .then(res => {
-          if(res.status === 200)
-          this.$store.commit('removePassanger', idPutnika)
-          this.getAngazmani()
-            alert("Sacuvano!")
-          this.removePassanger(idPutnika)
-        })
-      },
-    removePassanger (i) {
-      this.$store.commit('removePassanger', i)
-    }
   },
   beforeMount() {
-    this.getAngazmani()
-    //let pass = this.$store.getters.getCurentPassengers;
-   console.log(this.passenger);
+
   }
 }
 </script>
