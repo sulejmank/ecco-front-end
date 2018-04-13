@@ -1,5 +1,4 @@
 <template>
-
 <div class="">
   <navbar></navbar>
     <div class="col-6 ang"> 
