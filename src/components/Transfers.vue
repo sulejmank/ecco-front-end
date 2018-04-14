@@ -7,7 +7,19 @@
         <button class="btn btn-light" v-on:click.prevent="openDialog()"><i class="fas fa-plus-circle"></i>Dodaj Musteriju</button>
       </div>
       <hr class="custom"/>
-      <div class=" forma">
+      <div class="forma">
+        <b-alert variant="success"
+             dismissible
+             :show="showSuccess"
+             @dismissed="showSuccess=false">
+              Transfer uspesno kreiran!
+        </b-alert>
+        <b-alert variant="danger"
+                dismissible
+                :show="showDanger"
+                @dismissed="showDanger=false">
+            Transfer nije kreiran, probajte ponovo!
+        </b-alert>
       <b-form @submit="onSubmit"
                       label="Napravi Transfer">    
         <b-form-group 
@@ -75,6 +87,8 @@ export default {
     return {
       customerAdded: false,
       show: false,
+      showSuccess: false,
+      showDanger: false,
       angazmani: [],
       api: new Api(), 
       passengers: [],
@@ -89,7 +103,7 @@ export default {
         {value: null, text:"Izaberete opciju"},
         {value:'vozilo', text:'vozilo'},
         {value:'taxi', text:'taxi'},
-        {value:'bus', text:'autobus'}
+        {value:'autobus', text:'autobus'}
       ]
     }
   },
@@ -98,6 +112,9 @@ export default {
       this.show = true;
     },
     onSubmit (evt) {
+      this.showSuccess = true;
+      this.showDanger = true;
+      alert(JSON.stringify(this.form))
     }
   }
 }
@@ -106,7 +123,6 @@ export default {
 <style scoped>
 .forma {
   margin-top: 5%;
-  margin-left: 5%;
 }
 .ang {
   margin-left: 25%;
