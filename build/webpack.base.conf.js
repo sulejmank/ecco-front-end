@@ -68,6 +68,16 @@ module.exports = {
         }
       },
       {
+        test: /\.(jpg|png)$/,
+        use: [{
+          loader: 'file-loader',
+          options: {
+            name: '[name].[ext]',
+            outputPath: 'assets/static/images/'
+          }
+        }]
+      },
+      {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
         loader: 'url-loader',
         options: {
