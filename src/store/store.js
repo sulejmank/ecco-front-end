@@ -5,14 +5,25 @@ Vue.use(Vuex)
 
 export const store = new Vuex.Store({
   state: {
+    user: {},
+    plan: {},
+    room: {},
     customer: {},
     currentPassenger: {},
+    tickets: [],
     passangers: [],
+    arrangements: [],
     allPassangers: [],
-    products: [],
-    tickets: []
+    editingTicket: {},
+    dinarEuroDiffernece: 0
   },
   mutations: {
+    setFlightTicket: (state, ticket) => {
+      state.editingTicket = ticket
+    },
+    setRoom: (state, room) => {
+      state.room = room
+    },
     setCustomer: (state, customer) => {
       state.customer = customer
     },
@@ -40,9 +51,52 @@ export const store = new Vuex.Store({
     },
     addFlightTickets: (state, newTickets) => {
       newTickets.forEach(el => state.tickets.push(el))
+    },
+    addFlightTicket: (state, newTicket) => {
+      state.tickets.push(newTicket)
+    },
+    addArrangement: (state, arrangement) => {
+      state.arrangements.push(arrangement)
+    },
+    addMultipleArrangement: (state, newArrangements) => {
+      newArrangements.forEach(el => (state.arrangements.push(el)))
+    },
+    setAllFlightTickets: (state, context) => {
+      state.tickets = context
+    },
+    setAllArrangement: (state, context) => {
+      state.arrangements = context
+    },
+    removeFlightTicket: (state, index) => {
+      state.tickets = state.tickets.filter((el, i) => {
+        return i !== index
+      })
+    },
+    removeArrangement: (state, index) => {
+      state.arrangements = state.arrangements.filter((el, i) => {
+        return i !== index
+      })
+    },
+    setPlan: (state, plan) => {
+      state.plan = plan
+    },
+    setCurrencyDifference: (state, difference) => {
+      state.dinarEuroDiffernece = difference
+    },
+    setLoggedInUser: (state, user) => {
+      state.user = user
     }
   },
   getters: {
+    getEditingFlightTicket: state => {
+      return state.editingTicket
+    },
+    getPlan: state => {
+      return state.plan
+    },
+    getRoom: state => {
+      return state.room
+    },
     getCustomerId: state => {
       return state.customer.id
     },
@@ -52,83 +106,18 @@ export const store = new Vuex.Store({
     getCurentPassengerId: state => {
       return state.currentPassenger.id
     },
+    getCurrentPassenger: state => {
+      return state.currentPassenger
+    },
     getCurentPassengers: state => {
       return state.passangers
     },
     getFlightTickets: state => {
-      return [{
-        'avioKompanija': 'Nis Ekspres',
-        'brojRezervacije': '12333213',
-        'cena': 40,
-        'datumDolaska': '22/06/2018 21:56',
-        'datumPolaska': '30/05/2018 21:57',
-        'datumRezervacije': 'Mon Mar 12 2018 19: 20: 56 GMT + 0100(CET)',
-        'idPutnika': 8,
-        'jedanParvac': true,
-        'potvrdjeno': false,
-        'putovanjeDo': 'Belgrade, Serbia',
-        'putovanjeOd': 'Skopje, Macedonia (FYROM)'
-      }, {
-        'avioKompanija': 'Wizair',
-        'brojRezervacije': '123949594',
-        'cena': 200,
-        'datumDolaska': '07/05/2018 14:00',
-        'datumPolaska': '30/04/2018 15:50',
-        'datumRezervacije': 'Mon Mar 12 2018 19: 19: 12 GMT + 0100(CET)',
-        'idPutnika': 2,
-        'jedanParvac': true,
-        'potvrdjeno': false,
-        'putovanjeDo': 'Paris, France',
-        'putovanjeOd': 'Skopje, Macedonia (FYROM)'
-      }, {
-        'avioKompanija': 'Aurora',
-        'brojRezervacije': '1230349',
-        'cena': 10,
-        'datumDolaska': '',
-        'datumPolaska': '07/04/2018 10:10',
-        'datumRezervacije': 'Mon Mar 12 2018 19: 19: 12 GMT + 0100(CET)',
-        'idPutnika': 2,
-        'jedanParvac': false,
-        'potvrdjeno': false,
-        'putovanjeDo': 'Novi Pazar, Serbia',
-        'putovanjeOd': 'Skopje, Macedonia (FYROM)'
-      }]
-    }, // return state.tickets
+      return state.tickets
+    },
     getAllPassengers: state => {
-      return [{
-        'adresa': 'Sutenovacka 13',
-        'brojPasosa': '011512B',
-        'brojTelefona': '0654261211',
-        'cardId': 'asd',
-        'createdAt': '2018-03-09T21:43:14.000Z',
-        'datumRodjenja': '1993-09-21',
-        'email': 'hariszenovic@gmail.com',
-        'id': 2,
-        'ime': 'Haris',
-        'prezime': 'Zenovic',
-        'putnik': false,
-        'struka': 'Programer',
-        'updatedAt': '2018-03-09T21:43:14.000Z',
-        'urlSlike': 'https://s.ytimg.com/yts/img/avatar_720-vflYJnzBZ.png'
-      },
-      {
-        'adresa': 'Tashko Karadza',
-        'brojPasosa': '123123123',
-        'brojTelefona': '01239495123',
-        'cardId': '123123123',
-        'createdAt': '2018-03-09T21:43:14.000Z',
-        'datumRodjenja': '1994-04-22',
-        'email': 'hamzakujovic@gmail.com',
-        'id': 8,
-        'ime': 'Sulejman',
-        'prezime': 'Karisik',
-        'putnik': true,
-        'struka': 'Programer',
-        'updatedAt': '2018-03-09T21:43:14.000Z',
-        'urlSlike': 'https://s.ytimg.com/yts/img/avatar_720-vflYJnzBZ.png'
-      }
-      ]
-    }, // return state.allPassangers
+      return state.allPassangers
+    },
     getPassangerById: (state, id) => {
       var passenger
       state.allPassangers.forEach(el => {
@@ -137,12 +126,35 @@ export const store = new Vuex.Store({
         }
       })
       return passenger
+    },
+    getArrangements: (state) => {
+      return state.arrangements
+    },
+    getCurrencyDifference: (state) => {
+      return state.dinarEuroDiffernece
+    },
+    getUser: (state) => {
+      return state.user
+    },
+    isLoggedIn: (state) => {
+      return state.user.id !== undefined
     }
   },
   actions: {
     storePushPassanger: (context, payload) => {
       context.commit('setCurrentPassenger', payload)
+      // context.commit('storePassenger') TODO: make it be added by different action
+    },
+    storePushPassangerToGroup: (context, payload) => {
       context.commit('storePassenger')
+    },
+    restartPlan: (context, payload) => {
+      context.commit('setPlan', {})
+      context.commit('setCustomer', {})
+      context.commit('removeAllPassanger', {})
+      context.commit('setCurrentPassenger', {})
+      context.commit('setAllArrangement', [])
+      context.commit('setAllFlightTickets', [])
     }
   }
 })
