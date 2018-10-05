@@ -1,0 +1,62 @@
+<template>
+  <v-card-text>
+    <v-form v-model="valid" ref="agentForm">
+      <v-layout row wrap>
+
+        <v-flex sm12>
+          <v-text-field
+            v-model="agent.name"
+            :rules="nameRules"
+            label="Ime Agenta"
+            required
+          ></v-text-field>
+        </v-flex>
+
+      </v-layout>
+    </v-form>
+  </v-card-text>
+</template>
+
+<script>
+
+import Api from '@/services/api.js'
+import toast from '@/services/toast'
+import moment from 'moment'
+
+export default {
+  name: 'Agent',
+
+  props: {
+    agent: {
+      type: Object
+    }
+  },
+  data () {
+    return {
+      valid: false,
+      nameRules: [
+        v => !!v || 'Ime Agenta je obavezan podatak'
+        // v => v.length <= 10 || 'Name must be less than 10 characters'
+      ],
+    }
+  },
+  computed: {
+    isValid () {
+      return this.$refs.agentForm.validate()
+    }
+  },
+  methods: {
+  },
+  watch: {
+  },
+  mounted () {
+
+  }
+}
+</script>
+
+<style>
+.menuable__content__active{
+  min-width: 0 !important;
+}
+</style>

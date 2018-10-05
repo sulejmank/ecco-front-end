@@ -1,6 +1,8 @@
-// export default class Payment {
-//   constructor (dueDate, amount) {
-//     this. = dueDate || {}
-//     this.iznos = amount || ''
-//   }
-// }
+import moment from 'moment'
+
+export default class Payment {
+  constructor (timeStamp, amount) {
+    this.paymentDate = timeStamp || moment().format('YYYY-MM-DD')
+    this.payment = amount || ''
+  }
+}
